@@ -7,87 +7,88 @@
 /// <reference path="./interfaces.d.ts"/>
 
 import { Router } from 'director/build/director.js';
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import React from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+import ReactDOM from 'react-dom/client';
 import { TodoFooter } from "./footer";
 import { TodoItem } from "./todoItem";
+import { usePrivy } from "@privy-io/react-auth";
+
 import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS, ENTER_KEY } from "./constants";
 
-export class TodoApp extends React.Component<IAppProps, IAppState> {
 
-  public state : IAppState;
+export default function TodoApp(props: IAppProps) {
 
-  constructor(props : IAppProps) {
-    super(props);
-    this.state = {
-      nowShowing: ALL_TODOS,
-      editing: null
-    };
-  }
+  const [showing, setShowing] = useState(ACTIVE_TODOS);
+  const [editing, setEditing] = useState("");
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+  const newFieldRef = useRef<HTMLInputElement | null>(null);
+  const { ready, authenticated, user, login, logout } = usePrivy();
 
-  public componentDidMount() {
-    var setState = this.setState;
-    var router = Router({
-      '/': setState.bind(this, {nowShowing: ALL_TODOS}),
-      '/active': setState.bind(this, {nowShowing: ACTIVE_TODOS}),
-      '/completed': setState.bind(this, {nowShowing: COMPLETED_TODOS})
-    });
-    router.init('/');
-  }
 
-  public handleNewTodoKeyDown(event : React.KeyboardEvent) {
+
+
+
+
+  function handleNewTodoKeyDown(event : React.KeyboardEvent) {
     if (event.keyCode !== ENTER_KEY) {
       return;
     }
 
     event.preventDefault();
 
-    var val = (ReactDOM.findDOMNode(this.refs["newField"]) as HTMLInputElement).value.trim();
+    var val = newFieldRef.current.value.trim();
+    console.log("ref val :", val);
 
     if (val) {
-      this.props.model.addTodo(val);
-      (ReactDOM.findDOMNode(this.refs["newField"]) as HTMLInputElement).value = '';
+      props.model.addTodo(val);
+      newFieldRef.current.value = '';
     }
   }
 
-  public toggleAll(event : React.FormEvent) {
+  function toggleAll(event : React.FormEvent) {
     var target : any = event.target;
     var checked = target.checked;
-    this.props.model.toggleAll(checked);
+    props.model.toggleAll(checked);
   }
 
-  public toggle(todoToToggle : ITodo) {
-    this.props.model.toggle(todoToToggle);
+  function toggle(todoToToggle : ITodo) {
+    props.model.toggle(todoToToggle);
   }
 
-  public destroy(todo : ITodo) {
-    this.props.model.destroy(todo);
+  function destroy(todo : ITodo) {
+    props.model.destroy(todo);
   }
 
-  public edit(todo : ITodo) {
-    this.setState({editing: todo.id});
+  function edit(todo : ITodo) {
+    setEditing(todo.id)
   }
 
-  public save(todoToSave : ITodo, text : String) {
-    this.props.model.save(todoToSave, text);
-    this.setState({editing: null});
+  function save(todoToSave : ITodo, text : String) {
+    props.model.save(todoToSave, text);
+    setEditing("")
   }
 
-  public cancel() {
-    this.setState({editing: null});
+  function cancel() {
+    setEditing("")
   }
 
-  public clearCompleted() {
-    this.props.model.clearCompleted();
+  function clearCompleted() {
+    props.model.clearCompleted();
   }
 
-  public render() {
+ 
+
     var footer;
     var main;
-    const todos = this.props.model.todos;
+    const todos = props.model.todos;
+    console.log("todos from props:", todos);
+    console.log("state:", showing);
+
 
     var shownTodos = todos.filter((todo) => {
-      switch (this.state.nowShowing) {
+      switch (showing) {
       case ACTIVE_TODOS:
         return !todo.completed;
       case COMPLETED_TODOS:
@@ -110,11 +111,11 @@ export class TodoApp extends React.Component<IAppProps, IAppState> {
           <TodoItem
             key={todo.id}
             todo={todo}
-            onToggle={this.toggle.bind(this, todo)}
-            onDestroy={this.destroy.bind(this, todo)}
-            onEdit={this.edit.bind(this, todo)}
-            editing={this.state.editing === todo.id}
-            onSave={this.save.bind(this, todo)}
+            onToggle={toggle.bind(this, todo)}
+            onDestroy={destroy.bind(this, todo)}
+            onEdit={edit.bind(this, todo)}
+            editing={editing === todo.id}
+            onSave={save.bind(this, todo)}
             onCancel={ e => this.cancel() }
           />
         );
@@ -135,7 +136,7 @@ export class TodoApp extends React.Component<IAppProps, IAppState> {
         <TodoFooter
           count={activeTodoCount}
           completedCount={completedCount}
-          nowShowing={this.state.nowShowing}
+          nowShowing={showing}
           onClearCompleted={ e=> this.clearCompleted() }
         />;
     }
@@ -161,22 +162,53 @@ export class TodoApp extends React.Component<IAppProps, IAppState> {
         </section>
       );
     }
+  
 
-    return (
-      <div>
-        <header className="header">
-          <h1>todos</h1>
-          <input
-            ref="newField"
-            className="new-todo"
-            placeholder="What needs to be done?"
-            onKeyDown={ e => this.handleNewTodoKeyDown(e) }
-            autoFocus={true}
-          />
-        </header>
+  return (
+      <div className="flex h-full w-full flex-col items-center justify-center bg-softWhite selection:bg-berryBlue dark:bg-trueBlack dark:selection:bg-purpleRain">
+        {/* If the user is not authenticated, show a login button */}
+        {/* If the user is authenticated, show the user object and a logout button */}
+        <h1>zkzelle</h1>
+
+        {ready && authenticated ? (
+          <>
+                        <header className="bg-amber-300">
+
+          <div>
+                    <div>
+                
+                 
+                            <input
+                            ref={newFieldRef}
+                            placeholder="How many USDC do you want to sell?"
+                            onKeyDown={handleNewTodoKeyDown}
+                            autoFocus={true}
+                          />
+                      </div>
+            </div>
+            </header>
         {main}
-        {footer}
+        <textarea
+              readOnly
+              value={JSON.stringify(user, null, 2)}
+              style={{ width: "600px", height: "250px", borderRadius: "6px" }}
+            />
+            <br />
+            <button             className="btn" >
+              text
+              </button>
+            <button onClick={logout} style={{ marginTop: "20px", padding: "12px", backgroundColor: "#069478", color: "#FFF", border: "none", borderRadius: "6px" }}>
+              Log Out
+            </button>
+        </>
+        ) : (
+          <button onClick={login} style={{padding: "12px", backgroundColor: "#069478", color: "#FFF", border: "none", borderRadius: "6px" }}>Log In</button>
+        )}
+
+
+      {footer}
+
       </div>
-    );
-  }
+  )
+  
 }

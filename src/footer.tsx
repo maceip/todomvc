@@ -12,8 +12,8 @@ import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from "./constants";
 import { Utils } from "./utils";
 
 class TodoFooter extends React.Component<ITodoFooterProps, {}> {
-
   public render() {
+
     var activeTodoWord = Utils.pluralize(this.props.count, 'item');
     var clearButton = null;
 
@@ -33,6 +33,7 @@ class TodoFooter extends React.Component<ITodoFooterProps, {}> {
         <span className="todo-count">
           <strong>{this.props.count}</strong> {activeTodoWord} left
         </span>
+        <span>SHOWING: {nowShowing}</span>
         <ul className="filters">
           <li>
             <a

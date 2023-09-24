@@ -42,6 +42,8 @@ interface ITodoModel {
 }
 
 interface IAppProps {
+
+
   model : ITodoModel;
 }
 

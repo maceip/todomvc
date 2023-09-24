@@ -1,21 +1,27 @@
-import "todomvc-app-css/index.css"
-import "todomvc-common/base.css"
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { TodoApp } from "./app";
+//import "todomvc-app-css/index.css"
+//import "todomvc-common/base.css"
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import  TodoApp from "./app";
 import { TodoModel } from "./todoModel";
 import * as collab from './collab'
+import { PrivyProvider } from '@privy-io/react-auth';
+import "./app.scss";
 
 const namespace = 'react-todos';
 var model = new TodoModel(namespace);
-
-function render() {
-  ReactDOM.render(
-    <TodoApp model={model}/>,
-    document.getElementsByClassName('todoapp')[0]
-  );
-}
-
-model.subscribe(render);
+const root = ReactDOM.createRoot(document.getElementById('root'));
+model.subscribe(root.render);
 collab.attach(model);
-render();
+root.render(
+  <React.StrictMode>
+
+    <PrivyProvider appId="clmv0gpkb00btkw0ffskuijko"   onSuccess={(user) => console.log(`User ${user.id} logged in!`)}      >
+
+    <TodoApp model={model}/>
+    </PrivyProvider>
+    </React.StrictMode>,
+
+  );
+
+

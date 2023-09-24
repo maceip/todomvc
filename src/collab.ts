@@ -58,6 +58,14 @@ export function attach (_model: TodoModel) {
   void start()
 }
 
+const DOM = {
+  input: () => document.getElementById('input'),
+  identifyBtn: () => document.getElementById('identify-button'),
+  output: () => document.getElementById('output'),
+  terminal: () => document.getElementById('terminal'),
+  peerCount: () => document.getElementById('node-peer-count')
+}
+
 export async function start (): Promise<void> {
   const datastore = new IDBDatastore('datastore')
   const blockstore = new IDBBlockstore('blockstore')
@@ -69,6 +77,11 @@ export async function start (): Promise<void> {
     blockstore,
     libp2p
   })
+
+   // DOM.peerCount().innerText = "0"
+   // setInterval(() => {
+    //  DOM.peerCount().innerText = helia.libp2p.getPeers().length
+    //}, 1000)
 
   welo = await createWelo({
     ipfs: helia,
@@ -118,7 +131,13 @@ export async function start (): Promise<void> {
 
 const updateModel = async (db: Database, model: TodoModel): Promise<void> => {
   await db.store.latest()
+  console.log("before storing them: ", model.todos)
+
   model.todos = await getTodos(db)
+  console.log("update model: ", await getTodos(db))
+  console.log("after storing them: ", model.todos)
+
+
   model.inform()
 }
 

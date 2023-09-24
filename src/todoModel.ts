@@ -26,12 +26,21 @@ class TodoModel implements ITodoModel {
   }
 
   public subscribe(onChange) {
+    console.log("subscribe: ", onChange);
     this.onChanges.push(onChange);
   }
 
   public inform() {
     Utils.store(this.key, this.todos);
-    this.onChanges.forEach(function (cb) { cb(); });
+    console.log("ZZZZ: ", this.onChanges);
+    this.onChanges.forEach((updateItem) => {
+      if (typeof updateItem === 'function') {
+        //updateItem()
+
+
+  }});
+
+   // this.onChanges.forEach(function (cb) { cb(); });
   }
 
   public addTodo(title : string) {
@@ -41,7 +50,7 @@ class TodoModel implements ITodoModel {
       completed: false
     }
     this.todos = this.todos.concat(todo);
-
+    console.log("ABOUT TO PUT: ", todo);
     void collab.putTodos([todo])
   }
 
